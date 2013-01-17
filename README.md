@@ -108,8 +108,8 @@ vault = Cryptography::Vault.new(key, "secret data")
 vault.to_bytes # => "\xAB\xD8\xD3\x1E..." (equivalent to Vault::lock)
 vault.to_s     # => "\xAB\xD8\xD3\x1E..." (equivalent to Vault::lock)
 vault.to_a     # => [ "\xAB\xD8\xD3\x1E...", "\x9A\xEB\x19\x97..." ]
-vault.to_h     # =>  # => { :iv         => "\xAB\xD8\xD3\x1E...",
-                            :ciphertext => "\x9A\xEB\x19\x97...", }
+vault.to_h     # => { :iv         => "\xAB\xD8\xD3\x1E...",
+               #      :ciphertext => "\x9A\xEB\x19\x97...", }
 
 # serialize to plaintext-friendly formats
 vault.to_base64 # => "q9jTHg...\n"
@@ -120,8 +120,10 @@ vault.dump          # => \x04\bU:\nVault..." (uses native Ruby [marshalling])
 Marshal.dump(vault) # => \x04\bU:\nVault..." (equivalent to the above)
 ```
 
-You can later restore the Vault from these formats, and use the
-`#unlock` method to retrieve the data contained within.
+#### Restoring from Serialized Formats ####
+
+You can later restore the Vault from the above formats, and use the
+`#unlock` method to access the protected data inside.
 
 ```ruby
 # restore a vault from bytes, string, array, or hash
