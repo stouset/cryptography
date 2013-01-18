@@ -1,1 +1,6 @@
 vendor/nacl-20110221/build
+
+ext/**/*.log
+ext/**/*.o
+
+*.bundle
