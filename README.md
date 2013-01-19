@@ -144,6 +144,34 @@ vault = Marshal.load(dump)
 vault.unlock(key) # => "secret data"
 ```
 
+#### Migrating to Different Algorithms ####
+
+If the underlying cipher of the Vault is ever compromised, an update
+will be released that prevents encrypting new data with the flawed
+algorithm (this can be disabled, but warnings will still be
+logged). Existing data can still be decrypted using existing
+keys. This is possible because all keys encode the algorithm they're
+to be used for.
+
+You can use this feature to easily replace the keys for a vault. The
+`#rekey` method takes the old key, a new key, the existing vault, and
+returns a new vault containing the data inside the old vault, but
+locked with the new key.
+
+```ruby
+new_key = Cryptography::Vault.key
+old_key = "..."
+vault   = "\xAB\xD8\xD3\x1E..."
+
+Cryptography::Vault.rekey(old_key, new_key, vault) # => "\xB3\x88\x9C\x7C"
+```
+
+### Cryptography::Data::Vault ###
+### Cryptography::Data::Lockbox ###
+### Cryptography::Data::Signature ###
+### Cryptography::Auth::Password ###
+### Cryptography::Auth::Token ###
+
 [a-e-s]:          http://chargen.matasano.com/chargen/2009/7/22/if-youre-typing-the-letters-a-e-s-into-your-code-youre-doing.html
 [djb]:            http://en.wikipedia.org/wiki/Daniel_J._Bernstein
 [nacl]:           http://nacl.cr.yp.to
