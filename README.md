@@ -32,7 +32,20 @@ own. It simply provides a sane, high-level, secure frontend to
 existing libraries developed and maintained by respected
 cryptographers with proven track records in security. In particular,
 cryptographic primitives are implemented with [DJB][djb]'s venerable
-[NaCl][nacl] library and passwords are processed with [bcrypt][bcrypt].
+[NaCl][nacl] library and passwords are processed with
+[bcrypt][bcrypt].
+
+## Interoperability ##
+
+This library was not designed with interoperability as a goal. While
+it uses standardized, publicly-available algorithms, its data formats
+incorporate library-specific header information that won't be
+understood by other systems.
+
+Additionally, this library does not easily allow for settings to be
+tweaked or algorithms to be selected or changed. This is for the sake
+of protecting the user from him/herself, but comes at the cost of
+compatibility with third-party systems.
 
 ## Installation ##
 
