@@ -30,6 +30,7 @@ end unless File.exist?(NACL_LIB)
 warn "NaCl compiled successfully."
 
 dir_config('nacl', NACL_INCLUDE_DIR, NACL_LIB_DIR)
+have_library('nacl', 'crypto_hash_sha512',    'crypto_hash.h')
 have_library('nacl', 'crypto_secretbox',      'crypto_secretbox.h')
 have_library('nacl', 'crypto_secretbox_open', 'crypto_secretbox.h')
 

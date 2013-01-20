@@ -1,4 +1,5 @@
 #include <ruby.h>
+#include <crypto_hash_sha512.h>
 #include <crypto_secretbox.h>
 
 #include <stdlib.h>
