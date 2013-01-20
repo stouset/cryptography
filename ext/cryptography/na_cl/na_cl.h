@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 
-#ifndef _NACL_H
-#define _NACL_H
+#ifndef _NA_CL_H
+#define _NA_CL_H
 
 #define RB_NACL_CHECK_STRING(str) \
     Check_Type((str), T_STRING)
@@ -30,4 +30,4 @@
 
 extern VALUE cNaClError;
 
-#endif _NACL_H
+#endif _NA_CL_H
