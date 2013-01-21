@@ -1,4 +1,5 @@
 require 'cryptography/util'
+require 'securerandom'
 
 class Cryptography::Util::PBKDF2
   IMPLEMENTATIONS = [
@@ -6,23 +7,43 @@ class Cryptography::Util::PBKDF2
     Cryptography::NaCl::Auth::HMACSHA512256,
   ]
 
+  IMPLEMENTATION = IMPLEMENTATIONS.last
+
   PRIMITIVES = IMPLEMENTATIONS.inject({}) do |h, i|
     h.update(i::PRIMITIVE => i)
   end
-
-  IMPLEMENTATION = IMPLEMENTATIONS.last
-  ITERATIONS     = 1000 # TODO: self.calibrate(0.1)
 
   attr_accessor :primitive
   attr_accessor :iterations
   attr_accessor :length
 
+  def self.iterations
+    @iterations ||= self.calibrate(0.1)
+  end
+
+  def self.iterations=(iterations)
+    @iterations = iterations.to_i
+  end
+
   def self.calibrate(seconds)
+    (seconds / self.benchmark).to_i
+  end
+
+  def self.benchmark
+    password   = SecureRandom.random_bytes(8)
+    salt       = SecureRandom.random_bytes(32)
+    iterations = 5_000
+    pbkdf2     = self.new(32, :iterations => iterations)
+    now        = Time.now
+
+    pbkdf2.key(password, salt)
+
+    (Time.now - now) / iterations
   end
 
   def initialize(length, options = {})
     self.primitive  = options[:primitive]  || IMPLEMENTATION::PRIMITIVE
-    self.iterations = options[:iterations] || ITERATIONS
+    self.iterations = options[:iterations] || self.class.iterations
     self.length     = length
 
     _verify_primitive!
