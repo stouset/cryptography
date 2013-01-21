@@ -11,7 +11,7 @@ void Init_na_cl(void) {
 
     cNaClError = rb_define_class_under(mNaCl, "Error", rb_eStandardError);
 
-    // Init_na_cl_auth_hmacsha256(mNaCl);
+    Init_na_cl_auth_hmacsha256(mNaCl);
     Init_na_cl_auth_hmacsha512256(mNaCl);
     // Init_na_cl_hash_sha256(mNaCl);
     Init_na_cl_hash_sha512(mNaCl);
