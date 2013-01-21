@@ -57,7 +57,7 @@ class Cryptography::Util::PBKDF2
       seed     = salt + [ i ].pack('l>')
 
       result << _xor_chained_hmac(password, seed, self.iterations)
-    end
+    end[0, self.length]
   end
 
   protected
@@ -77,7 +77,7 @@ class Cryptography::Util::PBKDF2
   end
 
   def blocks
-    self.length / self.hmac_length
+    (self.length.to_f / self.hmac_length).ceil
   end
 
   private
@@ -88,18 +88,18 @@ class Cryptography::Util::PBKDF2
   end
 
   def _verify_iterations!
-    raise ArgumentError, %{iterations must be no less than zero} unless
-      self.iterations >= 0
+    raise ArgumentError, %{iterations must be at least one} unless
+      self.iterations > 0
   end
 
   def _verify_length!
-    raise ArgumentError, %{length must be greater than zero} unless
+    raise ArgumentError, %{length must be at least one} unless
       self.length > 0
-
-    raise ArgumentError, %{length must be a multiple of %{self.hmac_length}} unless
-      self.length % self.hmac_length == 0
   end
 
+  #
+  # TODO: implement in C; beat OpenSSL benchmark
+  #
   def _xor_chained_hmac(password, seed, iterations)
     result = self.implementation.auth(seed, password)
 
