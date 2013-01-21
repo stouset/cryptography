@@ -31,9 +31,12 @@ class Cryptography::Util::PBKDF2
   end
 
   def key(password, salt)
-    1.upto(self.blocks).map do |i|
-      _xor_chained_hmac(password, salt, self.iterations, i)
-    end.join
+    1.upto(self.blocks).inject("") do |result, i|
+      password = password.ljust(self.key_length, "\0")
+      seed     = salt + [ i ].pack('l>')
+
+      result << _xor_chained_hmac(password, seed, self.iterations)
+    end
   end
 
   protected
@@ -76,16 +79,22 @@ class Cryptography::Util::PBKDF2
       self.length % self.hmac_length == 0
   end
 
-  def _xor_chained_hmac(password, salt, iterations, i)
-    password = password.ljust(self.key_length, 0.chr)
-    seed     = salt + [ i ].pack('l>')
+  def _xor_chained_hmac(password, seed, iterations)
+    result = self.implementation.auth(seed, password)
 
-    hmacs = iterations.times.inject [ seed ] do |results, _|
-      results << self.implementation.auth(results.last, password)
-    end.drop(1)
-
-    hmacs.inject do |xor, hmac|
-      xor.bytes.zip(hmac.bytes).map {|pair| pair[0] ^ pair[1] }.map(&:chr).join
+    (iterations - 1).times.inject(result) do |xor|
+      result = self.implementation.auth(result, password)
+      xor    = _xor(xor, result)
     end
+  end
+
+  def _xor(left, right)
+    left   = left .bytes
+    right  = right.bytes.to_a
+    result = ""
+
+    left.each.with_index {|b, i| result << (b ^ right[i]) }
+
+    result
   end
 end
