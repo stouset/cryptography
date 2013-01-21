@@ -8,20 +8,16 @@ static VALUE ruby_crypto_hash_sha512(
 
     unsigned long long mlen = RSTRING_LEN(message);
     unsigned long long hlen = crypto_hash_sha512_BYTES;
-    unsigned char      *m   = 0;
+    unsigned char      *m   = RSTRING_PTR(message);
     unsigned char      *h   = 0;
 
     RB_NACL_CHECK_STRING(message);
 
-    RB_NACL_CALLOC(m, mlen, 0);
-    RB_NACL_CALLOC(h, hlen, RB_NACL_CFREE(m, mlen));
-
-    memcpy(m, RSTRING_PTR(message), mlen);
+    RB_NACL_CALLOC(h, hlen, (void) 0);
 
     if (!crypto_hash_sha512(h, m, mlen))
         hash = rb_str_new(h, hlen);
 
-    RB_NACL_CFREE(m, mlen);
     RB_NACL_CFREE(h, hlen);
 
     if (!hash)
@@ -30,9 +26,9 @@ static VALUE ruby_crypto_hash_sha512(
     return hash;
 }
 
-void Init_na_cl_hash_sha512(VALUE mNaCl) {
-    VALUE mHash   = rb_define_module_under(mNaCl, "Hash");
-    VALUE mSHA512 = rb_define_module_under(mHash, "SHA512");
+void Init_na_cl_hash_sha512(VALUE module) {
+    VALUE mHash   = rb_define_module_under(module, "Hash");
+    VALUE mSHA512 = rb_define_module_under(mHash,  "SHA512");
 
     rb_define_const(mSHA512, "PRIMITIVE", ID2SYM(rb_intern("sha512")));
     rb_define_const(mSHA512, "HASH_LEN",  INT2FIX(crypto_hash_sha512_BYTES));

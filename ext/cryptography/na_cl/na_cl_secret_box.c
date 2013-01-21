@@ -11,22 +11,25 @@ static VALUE ruby_crypto_secretbox(
     unsigned long long mpadlen = crypto_secretbox_ZEROBYTES;
     unsigned long long cpadlen = crypto_secretbox_BOXZEROBYTES;
     unsigned long long mlen    = RSTRING_LEN(message) + mpadlen;
+    unsigned long long klen    = crypto_secretbox_KEYBYTES;
+    unsigned long long nlen    = crypto_secretbox_NONCEBYTES;
+    unsigned long long clen    = mlen - cpadlen;
     unsigned char      *m      = 0;
     unsigned char      *c      = 0;
     unsigned char      *n      = RSTRING_PTR(nonce);
     unsigned char      *k      = RSTRING_PTR(key);
 
     RB_NACL_CHECK_STRING(message);
-    RB_NACL_CHECK_STRING_LEN(key,   crypto_secretbox_KEYBYTES);
-    RB_NACL_CHECK_STRING_LEN(nonce, crypto_secretbox_NONCEBYTES);
+    RB_NACL_CHECK_STRING_LEN(key,   klen);
+    RB_NACL_CHECK_STRING_LEN(nonce, nlen);
 
-    RB_NACL_CALLOC(m, mlen, 0);
+    RB_NACL_CALLOC(m, mlen, (void) 0);
     RB_NACL_CALLOC(c, mlen, RB_NACL_CFREE(m, mlen));
 
     memcpy(m + mpadlen, RSTRING_PTR(message), RSTRING_LEN(message));
 
     if (!crypto_secretbox(c, m, mlen, n, k))
-        ciphertext = rb_str_new(c + cpadlen, mlen - cpadlen);
+        ciphertext = rb_str_new(c + cpadlen, clen);
 
     RB_NACL_CFREE(m, mlen);
     RB_NACL_CFREE(c, mlen);
@@ -47,6 +50,8 @@ static VALUE ruby_crypto_secretbox_open(
 
     unsigned long long mpadlen = crypto_secretbox_ZEROBYTES;
     unsigned long long cpadlen = crypto_secretbox_BOXZEROBYTES;
+    unsigned long long klen    = crypto_secretbox_KEYBYTES;
+    unsigned long long nlen    = crypto_secretbox_NONCEBYTES;
     unsigned long long clen    = RSTRING_LEN(ciphertext) + cpadlen;
     unsigned char      *m      = 0;
     unsigned char      *c      = 0;
@@ -54,10 +59,10 @@ static VALUE ruby_crypto_secretbox_open(
     unsigned char      *k      = RSTRING_PTR(key);
 
     RB_NACL_CHECK_STRING(ciphertext);
-    RB_NACL_CHECK_STRING_LEN(key,   crypto_secretbox_KEYBYTES);
-    RB_NACL_CHECK_STRING_LEN(nonce, crypto_secretbox_NONCEBYTES);
+    RB_NACL_CHECK_STRING_LEN(key,   klen);
+    RB_NACL_CHECK_STRING_LEN(nonce, nlen);
 
-    RB_NACL_CALLOC(m, clen, 0);
+    RB_NACL_CALLOC(m, clen, (void) 0);
     RB_NACL_CALLOC(c, clen, RB_NACL_CFREE(m, clen));
 
     memcpy(c + cpadlen, RSTRING_PTR(ciphertext), RSTRING_LEN(ciphertext));
@@ -74,12 +79,12 @@ static VALUE ruby_crypto_secretbox_open(
     return message;
 }
 
-void Init_na_cl_secret_box(VALUE mNaCl) {
-    VALUE mSecretBox = rb_define_module_under(mNaCl, "SecretBox");
+void Init_na_cl_secret_box(VALUE module) {
+    VALUE mSecretBox = rb_define_module_under(module, "SecretBox");
 
     rb_define_const(mSecretBox, "PRIMITIVE", ID2SYM(rb_intern(crypto_secretbox_PRIMITIVE)));
-    rb_define_const(mSecretBox, "NONCE_LEN", INT2FIX(crypto_secretbox_NONCEBYTES));
     rb_define_const(mSecretBox, "KEY_LEN",   INT2FIX(crypto_secretbox_KEYBYTES));
+    rb_define_const(mSecretBox, "NONCE_LEN", INT2FIX(crypto_secretbox_NONCEBYTES));
 
     rb_define_module_function(mSecretBox, "secretbox",      ruby_crypto_secretbox,      3);
     rb_define_module_function(mSecretBox, "secretbox_open", ruby_crypto_secretbox_open, 3);
