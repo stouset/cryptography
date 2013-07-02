@@ -9,9 +9,13 @@ Gem::Specification.new do |gem|
   gem.summary     = %{TBD}
   gem.description = %{TBD}
 
-  gem.bindir = 'script'
+  gem.bindir      = 'script'
   gem.files       = `git ls-files`            .split("\n")
-  gem.extensions  = `git ls-files -- ext/*.rb`.split("\n")
-  gem.executables = `git ls-files -- script/*`.split("\n").map {|e| e.delete('script/') }
+  gem.executables = `git ls-files -- script/*`.split("\n").map {|e| File.basename(e) }
   gem.test_files  = `git ls-files -- spec/*`  .split("\n")
+
+  gem.add_dependency 'sodium', '~> 0.6'
+
+  gem.add_development_dependency 'rake',     '~> 10'
+  gem.add_development_dependency 'minitest', '~> 5'
 end
