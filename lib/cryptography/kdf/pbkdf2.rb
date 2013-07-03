@@ -1,7 +1,7 @@
-require 'cryptography/stretching'
+require 'cryptography/kdf'
 require 'benchmark'
 
-class Cryptography::Stretching::PBKDF2
+class Cryptography::KDF::PBKDF2
   PRIMITIVES = {
     :hmacsha256    => 1,
     :hmacsha512256 => 2,

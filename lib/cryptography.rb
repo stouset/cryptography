@@ -3,4 +3,4 @@ end
 
 require 'sodium'
 
-require 'cryptography/stretching'
+require 'cryptography/kdf'
