@@ -32,7 +32,7 @@ class Cryptography::KDF::PBKDF2
     # measure the total CPU time (not wall-clock time) and use it to
     # determine the time needed to calculate a single iteration on average
     Benchmark.measure do
-     pbkdf2.stretch(password, salt)
+     pbkdf2.derive(password, salt)
     end.total / iterations
   end
 
@@ -47,7 +47,7 @@ class Cryptography::KDF::PBKDF2
     # _verify_length!
   end
 
-  def stretch(password, salt, options = {})
+  def derive(password, salt, options = {})
     # disable GC for the duration of the critical section of PBKDF2,
     # so we can squeeze out as many iterations as possible
     GC.disable
