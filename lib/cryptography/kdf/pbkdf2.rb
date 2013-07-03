@@ -30,14 +30,14 @@ class Cryptography::KDF::PBKDF2
     pbkdf2     = self.new(32, :cost => iterations)
 
     # measure the total CPU time (not wall-clock time) and use it to
-    # determine the time to calculate an average iteration
+    # determine the time needed to calculate a single iteration on average
     Benchmark.measure do
      pbkdf2.stretch(password, salt)
     end.total / iterations
   end
 
   def initialize(size, options = {})
-    # TODO: default cost based on the primitive
+    # TODO: default cost based on the specific primitive
     self.size      = size
     self.primitive = options[:primitive] || Sodium::Auth.primitive
     self.cost      = options[:cost]      || self.class.cost
@@ -47,7 +47,7 @@ class Cryptography::KDF::PBKDF2
     # _verify_length!
   end
 
-  def stretch(password, salt)
+  def stretch(password, salt, options = {})
     # disable GC for the duration of the critical section of PBKDF2,
     # so we can squeeze out as many iterations as possible
     GC.disable
@@ -60,6 +60,9 @@ class Cryptography::KDF::PBKDF2
     # be filled in later
     seed = Sodium::Buffer.rpad(salt, 4)
 
+    # allow the cost to be overridden
+    cost = options[:cost] || self.cost
+
     # cache the block size for performance reasons
     size = self.block_size
 
@@ -68,7 +71,7 @@ class Cryptography::KDF::PBKDF2
         seed[salt.bytesize, 4] = [ block + 1 ].pack('L>')
         offset                 = block * size
 
-        key[offset, size] = _xor_chained_hmac(password, seed, self.cost)
+        key[offset, size] = _xor_chained_hmac(password, seed, cost)
       end
     end
   ensure
