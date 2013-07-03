@@ -29,10 +29,6 @@ class Cryptography::KDF::PBKDF2
     iterations = 50_000
     pbkdf2     = self.new(32, :cost => iterations)
 
-    # do our best to ensure garbage collection doesn't get run during
-    # the measured interval
-    GC.start
-
     # measure the total CPU time (not wall-clock time) and use it to
     # determine the time to calculate an average iteration
     Benchmark.measure do
@@ -52,6 +48,10 @@ class Cryptography::KDF::PBKDF2
   end
 
   def stretch(password, salt)
+    # disable GC for the duration of the critical section of PBKDF2,
+    # so we can squeeze out as many iterations as possible
+    GC.disable
+
     # the password must be padded to the size of the HMAC key
     password = Sodium::Buffer.ljust(password, self.key_size)
 
@@ -71,6 +71,9 @@ class Cryptography::KDF::PBKDF2
         key[offset, size] = _xor_chained_hmac(password, seed, self.cost)
       end
     end
+  ensure
+    # be a good citizen and turn GC back on :)
+    GC.enable
   end
 
   protected
