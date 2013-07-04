@@ -64,16 +64,20 @@ class Cryptography::KDF::PBKDF2
     cost = options[:cost] || self.cost
 
     # cache the block size for performance reasons
-    size = self.block_size
+    block_size = self.block_size
 
-    Sodium::Buffer.empty(self.size) do |key|
-      self.blocks.times do |block|
-        seed[salt.bytesize, 4] = [ block + 1 ].pack('L>')
-        offset                 = block * size
+    # ensure the buffer is sized to a multiple of the block size; we
+    # trim it down to the requested number of bytes later
+    buffer_size = block_size * (self.size.to_f / block_size).ceil
 
-        key[offset, size] = _xor_chained_hmac(password, seed, cost)
+    Sodium::Buffer.empty(buffer_size) do |key|
+      self.blocks.times do |block_number|
+        seed[salt.bytesize, 4] = [ block_number + 1 ].pack('L>')
+        offset                 = block_number * block_size
+
+        key[offset, block_size] = _xor_chained_hmac(password, seed, cost)
       end
-    end
+    end[0, self.size]
   ensure
     # be a good citizen and turn GC back on :)
     GC.enable
