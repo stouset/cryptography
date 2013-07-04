@@ -2,11 +2,6 @@ require 'cryptography/kdf'
 require 'benchmark'
 
 class Cryptography::KDF::PBKDF2
-  PRIMITIVES = {
-    :hmacsha256    => 1,
-    :hmacsha512256 => 2,
-  }
-
   attr_accessor :size
   attr_accessor :primitive
   attr_accessor :cost
