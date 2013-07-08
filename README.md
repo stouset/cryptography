@@ -1,7 +1,13 @@
-# cryptography #
+[![Gem version][gem-badge]][gem-url]
+[![Build Status][travis-badge]][travis-url]
+[![Dependency Status][gemnasium-badge]][gemnasium-url]
+[![Code Climate][codeclimate-badge]][codeclimate-url]
+[![Coverage Status][coveralls-badge]][coveralls-url]
 
-A Ruby library to provide abstractions for common use-cases of
-cryptography.
+cryptography
+============
+
+`cryptography` is a Ruby library to provide abstractions for common use-cases of cryptography.
 
 ## Description ##
 
@@ -193,3 +199,16 @@ Cryptography::Vault.rekey(old_key, new_key, vault) # => "\xB3\x88\x9C\x7C"
 [nacl-salsa20]:   http://cr.yp.to/salsa20.html
 [nacl-poly1305]:  http://cr.yp.to/mac.html
 [ruby-marshal]:   http://www.ruby-doc.org/core-1.9.3/Marshal.html
+
+[gem-badge]:         https://badge.fury.io/rb/cryptography.png
+[gem-url]:           https://badge.fury.io/rb/cryptography
+[travis-badge]:      https://travis-ci.org/stouset/cryptography.png
+[travis-url]:        https://travis-ci.org/stouset/cryptography
+[gemnasium-badge]:   https://gemnasium.com/stouset/cryptography.png
+[gemnasium-url]:     https://gemnasium.com/stouset/cryptography
+[codeclimate-badge]: https://codeclimate.com/github/stouset/cryptography.png
+[codeclimate-url]:   https://codeclimate.com/github/stouset/cryptography
+[coveralls-badge]:   https://coveralls.io/repos/stouset/cryptography/badge.png?branch=master
+[coveralls-url]:     https://coveralls.io/r/stouset/cryptography
+[rubydoc-badge]:     :(
+[rubydoc-url]:       https://rubydoc.org/gems/cryptgraphy/frames
