@@ -57,10 +57,10 @@ class Cryptography::KDF::PBKDF2
     # the password must be padded to the size of the HMAC key
     password = Sodium::Buffer.ljust(password, self.key_size)
 
-    # the seed for each hmac round is the salt prepended to the
+    # the salt for each hmac round is the salt prepended to the
     # four-byte round number, so we allocate four extra blank bytes to
     # be filled in later
-    seed = Sodium::Buffer.rpad(salt, 4)
+    salt = Sodium::Buffer.rpad(salt, 4)
 
     # allow the cost to be overridden
     cost = options[:cost] || self.cost
@@ -73,12 +73,7 @@ class Cryptography::KDF::PBKDF2
     buffer_size = block_size * (self.size.to_f / block_size).ceil
 
     Sodium::Buffer.empty(buffer_size) do |key|
-      self.blocks.times do |block_number|
-        seed[salt.bytesize, 4] = [ block_number + 1 ].pack('L>')
-        offset                 = block_number * block_size
-
-        key[offset, block_size] = _xor_chained_hmac(password, seed, cost)
-      end
+      _calculate_derived_key(key, password, salt, cost, self.size, self.block_size)
     end[0, self.size]
   ensure
     # be a good citizen and turn GC back on :)
@@ -108,7 +103,20 @@ class Cryptography::KDF::PBKDF2
   #
   # TODO: implement in C; beat OpenSSL benchmark
   #
-  def _xor_chained_hmac(password, seed, iterations)
+  def _calculate_derived_key(dk, password, salt, iterations, dklen, hlen)
+    (dklen.to_f / hlen).ceil.times do |i|
+      # the start of the block in the key we're computing
+      offset = hlen * i
+
+      # the value of the salt for this block includes the 1-based block number
+      salt[salt.bytesize - 4, 4] = [ i + 1 ].pack('N')
+
+      # the final value of this block of the key
+      dk[offset, hlen] = _calculate_chained_hmac(password, salt, iterations)
+    end
+  end
+
+  def _calculate_chained_hmac(password, salt, iterations)
     hmac = self.implementation
     auth = Sodium::Buffer.empty(self.block_size)
     xor  = Sodium::Buffer.empty(self.block_size)
@@ -116,22 +124,22 @@ class Cryptography::KDF::PBKDF2
     # cache the method calls to the bytes and sizes inside of each
     # buffer for performance reasons
     auth_bytes = auth.to_str
-    seed_bytes = seed.to_str
+    salt_bytes = salt.to_str
     pass_bytes = password.to_str
     xor_bytes  = xor.to_str
 
     # cache the method calls to bytesizes for the same reason
     auth_bytesize = auth_bytes.bytesize
-    seed_bytesize = seed_bytes.bytesize
+    salt_bytesize = salt_bytes.bytesize
 
-    # generate the first HMAC of the seed and password separately,
-    # since generating it from the seed is a special-case that only
+    # generate the first HMAC of the salt and password separately,
+    # since generating it from the salt is a special-case that only
     # happens on the first iteration (all other times it uses the
     # previous calculation)
     hmac.nacl(
       auth_bytes,
-      seed_bytes,
-      seed_bytesize,
+      salt_bytes,
+      salt_bytesize,
       pass_bytes
     )
 
