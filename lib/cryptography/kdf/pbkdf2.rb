@@ -2,27 +2,32 @@ require 'cryptography/kdf'
 require 'benchmark'
 
 class Cryptography::KDF::PBKDF2
+  DEFAULT_SECONDS   = 0.2
+  DEFAULT_PRIMITIVE = Sodium::Auth.primitive
+
   attr_accessor :size
   attr_accessor :primitive
   attr_accessor :cost
 
-  def self.cost
-    @cost ||= self.calibrate(0.2)
+  def self.cost(primitive = DEFAULT_PRIMITIVE)
+    @costs            ||= {}
+    @costs[primitive] ||  self.calibrate(0.2, primitive)
   end
 
-  def self.cost=(cost)
-    @cost = cost.to_i
+  def self.calibrate(seconds = DEFAULT_SECONDS, primitive = DEFAULT_PRIMITIVE)
+    @costs            ||= {}
+    @costs[primitive]   = (
+      seconds / self.benchmark(primitive)
+    ).to_i
   end
 
-  def self.calibrate(seconds)
-    (seconds / self.benchmark).to_i
-  end
-
-  def self.benchmark
+  def self.benchmark(primitive = DEFAULT_PRIMITIVE)
     password   = Sodium::Buffer.key(8)
     salt       = Sodium::Buffer.key(32)
     iterations = 50_000
-    pbkdf2     = self.new(32, :cost => iterations)
+    pbkdf2     = self.new 32,
+      :cost      => iterations,
+      :primitive => primitive
 
     # measure the total CPU time (not wall-clock time) and use it to
     # determine the time needed to calculate a single iteration on average
@@ -32,10 +37,9 @@ class Cryptography::KDF::PBKDF2
   end
 
   def initialize(size, options = {})
-    # TODO: default cost based on the specific primitive
     self.size      = size
-    self.primitive = options[:primitive] || Sodium::Auth.primitive
-    self.cost      = options[:cost]      || self.class.cost
+    self.primitive = options[:primitive] || DEFAULT_PRIMITIVE
+    self.cost      = options[:cost]      || self.class.cost(self.primitive)
 
     # _verify_primitive!
     # _verify_cost!
