@@ -1,5 +1,7 @@
 script: bundle exec rake test
 
+before_install: rake ci:dependencies
+
 bundler_args: --without tools
 
 env:
