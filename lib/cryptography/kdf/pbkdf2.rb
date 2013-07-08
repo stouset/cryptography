@@ -89,7 +89,7 @@ class Cryptography::KDF::PBKDF2
   end
 
   def key_size
-    self.implementation::KEYBYTES
+    self.implementation[:KEYBYTES]
   end
 
   def block_size
