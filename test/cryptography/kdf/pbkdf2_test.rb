@@ -8,7 +8,8 @@ describe Cryptography::KDF::PBKDF2 do
   def pbkdf2_hmac_sha256_test_vector(dk_len, cost, password, salt, string)
     kdf = self.klass.new(dk_len, :cost => cost, :primitive => :hmacsha256)
     dk  = kdf.derive(password, salt)
-    dk.to_str.must_equal [ string.gsub(%r{\s}, '') ].pack('H*')
+    dk.to_str.unpack('H*').first.scan(%r{\w\w}).join(' ').
+      must_equal string.strip.gsub %r{\s+}, ' '
   end
 
   it '::cost must reflect the number of iterations that can be run in reasonable time' do
