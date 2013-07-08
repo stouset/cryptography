@@ -38,7 +38,7 @@ namespace :libsodium do
   end
 
   file "#{LIBSODIUM_BUILD}/Makefile" => "#{LIBSODIUM_BUILD}/configure" do
-    sh %{cd #{LIBSODIUM_BUILD} && ./configure}
+    sh %{cd #{LIBSODIUM_BUILD} && ./configure --prefix=/usr}
   end
 
   task :install => "#{LIBSODIUM_BUILD}/Makefile" do
