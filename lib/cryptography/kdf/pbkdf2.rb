@@ -5,13 +5,16 @@ class Cryptography::KDF::PBKDF2
   DEFAULT_SECONDS   = 0.2
   DEFAULT_PRIMITIVE = Sodium::Auth.primitive
 
+  BENCHMARK_KEY_LENGTH = 32
+  BENCHMARK_ITERATIONS = 50_000
+
   attr_accessor :size
   attr_accessor :primitive
   attr_accessor :cost
 
   def self.cost(primitive = DEFAULT_PRIMITIVE)
     @costs            ||= {}
-    @costs[primitive] ||  self.calibrate(0.2, primitive)
+    @costs[primitive] ||  self.calibrate(DEFAULT_SECONDS, primitive)
   end
 
   def self.calibrate(seconds = DEFAULT_SECONDS, primitive = DEFAULT_PRIMITIVE)
@@ -22,17 +25,17 @@ class Cryptography::KDF::PBKDF2
   end
 
   def self.benchmark(primitive = DEFAULT_PRIMITIVE)
-    password   = Sodium::Buffer.key(8)
-    salt       = Sodium::Buffer.key(32)
-    iterations = 50_000
-    pbkdf2     = self.new 32,
+    password   = Sodium::Buffer.key BENCHMARK_KEY_LENGTH
+    salt       = Sodium::Buffer.key BENCHMARK_KEY_LENGTH
+    iterations = BENCHMARK_ITERATIONS
+    pbkdf2     = self.new BENCHMARK_KEY_LENGTH,
       :cost      => iterations,
       :primitive => primitive
 
     # measure the total CPU time (not wall-clock time) and use it to
     # determine the time needed to calculate a single iteration on average
     Benchmark.measure do
-     pbkdf2.derive(password, salt)
+      pbkdf2.derive(password, salt)
     end.total / iterations
   end
 
@@ -41,9 +44,9 @@ class Cryptography::KDF::PBKDF2
     self.primitive = options[:primitive] || DEFAULT_PRIMITIVE
     self.cost      = options[:cost]      || self.class.cost(self.primitive)
 
-    # _verify_primitive!
-    # _verify_cost!
-    # _verify_length!
+    _verify_size!
+    _verify_cost!
+    _verify_primitive!
   end
 
   def derive(password, salt, options = {})
@@ -156,5 +159,20 @@ class Cryptography::KDF::PBKDF2
     end
 
     xor
+  end
+
+  def _verify_size!
+    raise ArgumentError, %{size must be positive} unless
+      self.size > 0
+  end
+
+  def _verify_cost!
+    raise ArgumentError, %{cost must be positive} unless
+      self.cost > 0
+  end
+
+  def _verify_primitive!
+    raise ArgumentError, %{#{self.primitive} is not a recognized HMAC} unless
+      self.implementation
   end
 end
