@@ -4,10 +4,6 @@ before_install: sudo rake ci:dependencies
 
 bundler_args: --without tools
 
-env:
-  - >
-    ENABLE_SLOW_TESTS=1
-
 rvm:
   - 1.8.7
   - 1.9.3
