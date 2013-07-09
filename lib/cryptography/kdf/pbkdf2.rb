@@ -94,10 +94,6 @@ class Cryptography::KDF::PBKDF2
     self.implementation[:BYTES]
   end
 
-  def blocks
-    (self.size.to_f / self.block_size).ceil
-  end
-
   private
 
   #
