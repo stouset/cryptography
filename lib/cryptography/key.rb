@@ -17,9 +17,17 @@ class Cryptography::Key
     optional :bytes,                                :kdf_signature, 14
   end
 
-  def initialize!
+  def on_initialize!
+    _verify_context!
+    _verify_primitive!
+    _verify_size!
+
     self.attributes.freeze
     self           .freeze
+  end
+
+  def on_serialize!
+    _verify_serializable!
   end
 
   def initialize(context, primitive, size, password = nil)
@@ -31,7 +39,7 @@ class Cryptography::Key
 
     self.lock!(password) unless password.nil?
 
-    self.initialize!
+    self.on_initialize!
   end
 
   def bytes(context, primitive)
@@ -60,13 +68,21 @@ class Cryptography::Key
     _verify_signature! signature
 
     yield self.class.send :from_hash,
-      :context   => self.attributes[:context],
-      :primitive => self.attributes[:primitive],
-      :bytes     => key,
-      :locked    => true
+      :context      => self.attributes[:context],
+      :primitive    => self.attributes[:primitive],
+      :bytes        => key,
+      :protected    => true
   end
 
   protected
+
+  def context
+    self.attributes[:context]
+  end
+
+  def primitive
+    self.attributes[:primitive]
+  end
 
   def lock!(password)
     kdf = Cryptography::KDF::PBKDF2.new(
@@ -88,27 +104,49 @@ class Cryptography::Key
 
   private
 
-  def _verify_context!(context)
-    true
+  def _verify_context!(context = nil)
+    raise ArgumentError, %{unrecognized context "#{self.context}"} unless
+      Cryptography::Serializable::Context[self.context]
+
+    raise ArgumentError, %{unable to use a #{self.context} key in #{context} context} unless
+      context == self.context if context
   end
 
-  def _verify_primitive!(primitive)
-    true
+  def _verify_primitive!(primitive = nil)
+    raise ArgumentError, %{unrecognized primitive "#{self.primitive}"} unless
+      Cryptography::Serializable::Primitive[self.primitive]
+
+    raise ArgumentError, %{unable to use a #{self.primitive} key for #{primitive} operations} unless
+      primitive == self.primitive if primitive
   end
 
-  def _verify_locked!
-    true
+  def _verify_size!
+    raise ArgumentError, %{key size must be positive} unless
+      self.attributes[:bytes].bytesize > 0
   end
 
   def _verify_unlocked!
-    true
+    raise ArgumentError, %{key must be unlocked with a password} if
+      self.attributes[:locked]
   end
 
-  def _verify_signature!(signature)
-    true
+  def _verify_locked!
+    raise ArgumentError, %{key must be unlocked with a password first} unless
+      self.attributes[:locked]
   end
 
   def _verify_kdf!(kdf)
-    true
+    raise ArgumentError, %{PBKDF is the only supported KDF} unless
+      kdf == :pbkdf2
+  end
+
+  def _verify_signature!(signature)
+    raise ArgumentError, %{incorrect password used to unlock the key} unless
+      self.attributes[:kdf_signature] == signature
+  end
+
+  def _verify_serializable!
+    raise ArgumentError, %{password-protected keys may not be serialized when unlocked} if
+      self.attributes[:protected]
   end
 end
