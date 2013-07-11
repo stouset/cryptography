@@ -139,8 +139,12 @@ module Cryptography::Serializable
 
         # convert enums from their symbolic representation
         when ProtocolBuffers::Field::EnumField
-          field.value_to_name.key value.to_s.upcase
-
+          # 1.9+ issues a deprecation warning when you call `index`,
+          # so we use `key` for Rubies that support it and `index` for
+          # Rubies that don't (e.g., 1.8)
+          field.value_to_name.respond_to?(:key)        ?
+            field.value_to_name.key(value.to_s.upcase) :
+            field.value_to_name.index(value.to_s.upcase)
         else
           value
       end
