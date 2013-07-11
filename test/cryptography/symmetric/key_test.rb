@@ -1,7 +1,7 @@
 require 'test_helper'
 
-describe Cryptography::Key do
-  let(:klass)     { Cryptography::Key }
+describe Cryptography::Symmetric::Key do
+  let(:klass)     { Cryptography::Symmetric::Key }
   let(:size)      { 32 }
   let(:context)   { :vault }
   let(:primitive) { :xsalsa20poly1305 }
@@ -115,7 +115,7 @@ describe Cryptography::Key do
 
     it 'must serialize to a protocol buffer' do
       key = self.klass.from_s(self.subject.to_s)
-      key.must_be_kind_of Cryptography::Key
+      key.must_be_kind_of self.klass
 
       self.subject.bytes(self.context, self.primitive) do |bytes1|
         key.bytes(self.context, self.primitive) do |bytes2|

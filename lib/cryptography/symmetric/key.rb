@@ -1,6 +1,6 @@
-require 'cryptography'
+require 'cryptography/symmetric'
 
-class Cryptography::Key
+class Cryptography::Symmetric::Key
   include Cryptography::Serializable
 
   serialize do
