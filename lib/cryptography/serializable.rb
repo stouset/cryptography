@@ -3,9 +3,15 @@ require 'protocol_buffers'
 
 module Cryptography::Serializable
   module Enum
+    def self.included(base)
+      base.send :include, ::ProtocolBuffers::Enum
+      base.send :extend,  self
+    end
+
     def [](key)
-      self.constants.include?(key.to_s.upcase.to_sym) ?
-        self.const_get(key.to_s.upcase.to_sym) : nil
+      self.values.include?(key.to_sym)  ?
+        self.const_get(key.to_s.upcase) :
+        nil
     end
 
     def values
@@ -14,16 +20,14 @@ module Cryptography::Serializable
   end
 
   module Context
-    include ::ProtocolBuffers::Enum
-    extend  ::Cryptography::Serializable::Enum
+    include Enum
 
     UNKNOWN = 0
     VAULT   = 10
   end
 
   module Primitive
-    include ::ProtocolBuffers::Enum
-    extend  ::Cryptography::Serializable::Enum
+    include Enum
 
     UNKNOWN = 0
 
