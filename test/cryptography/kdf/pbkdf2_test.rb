@@ -12,7 +12,7 @@ describe Cryptography::KDF::PBKDF2 do
     it "must generate a key matching test vector #{string}" do
       kdf = self.klass.new(dk_len, :cost => cost, :primitive => :hmacsha256)
       dk  = kdf.derive(password, salt)
-      dk.to_str.unpack('H*').first.scan(%r{\w\w}).join(' ').must_equal string
+      dk.to_s.unpack('H*').first.scan(%r{\w\w}).join(' ').must_equal string
     end
   end
 

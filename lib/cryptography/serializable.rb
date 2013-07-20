@@ -55,8 +55,7 @@ module Cryptography::Serializable
     end
 
     def from_sodium_buffer(buffer)
-      # FIXME: don't dup
-      self.from_protocol_buffer self.serializer.parse(buffer.to_str.dup)
+      self.from_protocol_buffer self.serializer.parse(buffer.to_s)
     end
 
     def from_protocol_buffer(buffer)
@@ -103,7 +102,7 @@ module Cryptography::Serializable
   end
 
   def to_s
-    self.to_sodium_buffer.to_str
+    self.to_sodium_buffer.to_s
   end
 
   protected
@@ -135,7 +134,11 @@ module Cryptography::Serializable
       value = case field
         # convert byte buffers into strings from Sodium::Buffers
         when ProtocolBuffers::Field::BytesField
-          value.to_str
+          # we have to to_str for StringIO#write to produce the
+          # correct output; I was hesitant to do this because we lose
+          # the memory wiping guarantees, but the output goes into a
+          # string we don't control anyway
+          value.to_s.to_str
 
         # convert enums from their symbolic representation
         when ProtocolBuffers::Field::EnumField

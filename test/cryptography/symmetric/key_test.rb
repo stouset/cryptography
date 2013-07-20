@@ -23,12 +23,12 @@ describe Cryptography::Symmetric::Key do
 
     it "must never break backwards compatibility with the serialization format" do
       self.klass.from_s(string).bytes(context, primitive) do |bytes|
-        bytes.to_str.must_equal key.to_str
+        bytes.to_s.must_equal key.to_s
       end if password.nil?
 
       self.klass.from_s(string).unlock(password) do |unlocked|
         unlocked.bytes(context, primitive) do |bytes|
-          bytes.to_str.must_equal key.to_str
+          bytes.to_s.must_equal key.to_s
         end
       end unless password.nil?
     end
@@ -95,7 +95,7 @@ describe Cryptography::Symmetric::Key do
 
       key1.bytes(self.context, self.primitive) do |bytes1|
         key2.bytes(self.context, self.primitive) do |bytes2|
-          bytes1.to_str.wont_equal bytes2.to_str
+          bytes1.to_s.wont_equal bytes2.to_s
         end
       end
     end
@@ -103,7 +103,7 @@ describe Cryptography::Symmetric::Key do
     it 'must use a random source of data for key generation' do
       Sodium::Buffer.stub(:key, "\0" * 32) do
         self.subject.bytes(self.context, self.primitive) do |bytes|
-          bytes.to_str.must_equal "\0" * 32
+          bytes.to_s.must_equal "\0" * 32
         end
       end
     end
@@ -119,7 +119,7 @@ describe Cryptography::Symmetric::Key do
 
       self.subject.bytes(self.context, self.primitive) do |bytes1|
         key.bytes(self.context, self.primitive) do |bytes2|
-          bytes1.to_str.must_equal bytes2.to_str
+          bytes1.to_s.must_equal bytes2.to_s
         end
       end
     end

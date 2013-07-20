@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   gem.executables = `git ls-files -- script/*`.split("\n").map {|e| File.basename(e) }
   gem.test_files  = `git ls-files -- spec/*`  .split("\n")
 
-  gem.add_dependency 'sodium',                '~> 0.6'
+  gem.add_dependency 'sodium',                '~> 0.7'
   gem.add_dependency 'ruby-protocol-buffers', '~> 1'
 
   gem.add_development_dependency 'rake',     '~> 10'
