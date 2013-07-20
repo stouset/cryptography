@@ -26,7 +26,7 @@ describe Cryptography::KDF::PBKDF2 do
   end
 
   it '::cost must be different for different primitives' do
-    self.klass.cost(:hmacsha256).must_be :>, self.klass.cost
+    self.klass.cost(:hmacsha256).wont_equal self.klass.cost
   end
 
   it '::calibrate must change the cost based on the allowed running time' do

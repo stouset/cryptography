@@ -130,7 +130,7 @@ describe Cryptography::Symmetric::Key do
 
     # Sodium::Buffer clears cached `let`s
     def password
-      'password'
+      'password'.gsub('', '')
     end
 
     it 'must not allow direct access to its bytes' do
