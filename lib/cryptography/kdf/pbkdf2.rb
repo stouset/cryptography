@@ -119,14 +119,14 @@ class Cryptography::KDF::PBKDF2
 
     # cache the method calls to the bytes and sizes inside of each
     # buffer for performance reasons
-    auth_bytes = auth.to_str
-    salt_bytes = salt.to_str
-    pass_bytes = password.to_str
-    xor_bytes  = xor.to_str
+    auth_bytes = auth    .to_ptr
+    salt_bytes = salt    .to_ptr
+    pass_bytes = password.to_ptr
+    xor_bytes  = xor     .to_ptr
 
     # cache the method calls to bytesizes for the same reason
-    auth_bytesize = auth_bytes.bytesize
-    salt_bytesize = salt_bytes.bytesize
+    auth_bytesize = auth.bytesize
+    salt_bytesize = salt.bytesize
 
     # generate the first HMAC of the salt and password separately,
     # since generating it from the salt is a special-case that only
