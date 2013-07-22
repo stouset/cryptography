@@ -85,7 +85,7 @@ module Cryptography::Serializable
     def deserialize(attributes)
       self.allocate.tap do |o|
         o.send :attributes=, attributes
-        o.send :on_initialize!
+        o.send :on_initialize! if o.respond_to?(:on_initialize!)
       end
     end
 
@@ -123,7 +123,7 @@ module Cryptography::Serializable
   end
 
   def to_protocol_buffer
-    self.send(:on_serialize!)
+    self.send(:on_serialize!) if self.respond_to?(:on_serialize!)
 
     attributes = self.to_hash
     hash       = {}

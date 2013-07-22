@@ -42,6 +42,14 @@ class Cryptography::Symmetric::Key
     self.on_initialize!
   end
 
+  def context
+    self.attributes[:context]
+  end
+
+  def primitive
+    self.attributes[:primitive]
+  end
+
   def bytes(context, primitive)
     _verify_context!   context
     _verify_primitive! primitive
@@ -75,14 +83,6 @@ class Cryptography::Symmetric::Key
   end
 
   protected
-
-  def context
-    self.attributes[:context]
-  end
-
-  def primitive
-    self.attributes[:primitive]
-  end
 
   def lock!(password)
     kdf = Cryptography::KDF::PBKDF2.new(
