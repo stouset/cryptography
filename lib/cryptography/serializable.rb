@@ -23,7 +23,8 @@ module Cryptography::Serializable
     include Enum
 
     UNKNOWN = 0
-    VAULT   = 10
+
+    AUTHENTICATED_MESSAGE = 10
   end
 
   module Primitive

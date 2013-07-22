@@ -3,7 +3,7 @@ require 'test_helper'
 describe Cryptography::Symmetric::Key do
   let(:klass)     { Cryptography::Symmetric::Key }
   let(:size)      { 32 }
-  let(:context)   { :vault }
+  let(:context)   { :authenticated_message }
   let(:primitive) { :xsalsa20poly1305 }
 
   def self.protocol_buffer_enum_value(type, name, value)
@@ -34,8 +34,8 @@ describe Cryptography::Symmetric::Key do
     end
   end
 
-  protocol_buffer_enum_value :context, :unknown,  0
-  protocol_buffer_enum_value :context, :vault,   10
+  protocol_buffer_enum_value :context, :unknown,                0
+  protocol_buffer_enum_value :context, :authenticated_message, 10
 
   protocol_buffer_enum_value :primitive, :unknown,             0
   protocol_buffer_enum_value :primitive, :pbkdf2,             10
@@ -48,13 +48,13 @@ describe Cryptography::Symmetric::Key do
     "*",
     "\x00\x00\b\x00\x12\x01*"
 
-  protocol_buffer_key_test_vector :vault, :xsalsa20poly1305,
-    "\xB5\x9D\x8D\xAC\xD6@)n\xCEy\xC8\xB3|\x04\xCF?[\x17\fyP\xD7!\x9F)\x1F\xD2i\x10\x93I\xAA",
-    "\x00\n\b\xCC\b\x12 \xB5\x9D\x8D\xAC\xD6@)n\xCEy\xC8\xB3|\x04\xCF?[\x17\fyP\xD7!\x9F)\x1F\xD2i\x10\x93I\xAA"
+  protocol_buffer_key_test_vector :authenticated_message, :hmacsha512256,
+    "\x00h\xA4\xAC\xB2\xA3\xB2u\xE9\xFE[\x9B\x1D\xC3\x196\xB3\xF2y\n\x9EH\xA7\x91\xEDit'E\xA4%C",
+    "\x00\n\b\xE9\a\x12 \x00h\xA4\xAC\xB2\xA3\xB2u\xE9\xFE[\x9B\x1D\xC3\x196\xB3\xF2y\n\x9EH\xA7\x91\xEDit'E\xA4%C"
 
-  protocol_buffer_key_test_vector :vault, :xsalsa20poly1305, 'password',
-    "\x0E\xCA\x11\xEF!v\xD7\x8AF7_\x80\x86\xA4\x93 ",
-    "\x00\n\b\xCC\b\x12\x10\xA3b\xDC\x13\xE1\x03B\x12\x7F\xBE\xCA\xAE\x9C\x96D\xF7P\x01X\n`\xE9\ah\xD6\xD3\x02r\x10\xAA\xAF\xBB@\x16#\x88\x10++\xF3#\xCA\xF4\xA0\xCB"
+  protocol_buffer_key_test_vector :authenticated_message, :hmacsha512256, 'password',
+    "\xB9\x06?W$\xB4$2\x163/\x0E\xB2\x02\xC2\x8A)",
+    "\x00\n\b\xE9\a\x12\x11\x1D\xF3p\xDB()\b{\xD7\xA5xL\x01\x85N\xA3\x90P\x01X\n`\xE9\ah\x82\x97\x02r\x11+\xCF\xF3P\x8A\x92\xD1l&\xD9\xC0\xAA*\xF48T\xF6"
 
   describe 'without a password' do
     subject { self.klass.new(self.context, self.primitive, self.size) }
