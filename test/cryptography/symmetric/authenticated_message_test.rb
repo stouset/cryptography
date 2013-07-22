@@ -4,10 +4,7 @@ describe Cryptography::Symmetric::AuthenticatedMessage do
   subject         { self.klass.new(self.key, self.plaintext) }
   let(:klass)     { Cryptography::Symmetric::AuthenticatedMessage }
   let(:key)       { self.klass.key }
-
-  def plaintext
-    'message'
-  end
+  let(:plaintext) { Sodium::Buffer.new('message') }
 
   def self.protocol_buffer_authenticated_message_test_vector(plaintext, key, bytes)
     it "must never break backwards compatibility with the serialization format" do
@@ -40,6 +37,6 @@ describe Cryptography::Symmetric::AuthenticatedMessage do
   end
 
   it '#contents must require the key to reveal the message' do
-    self.subject.contents(self.key).to_s.must_equal self.plaintext
+    self.subject.contents(self.key).must_equal self.plaintext
   end
 end
