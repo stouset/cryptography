@@ -36,7 +36,40 @@ describe Cryptography::Symmetric::AuthenticatedMessage do
       must_be_kind_of self.klass
   end
 
+  it %{won't instantiate with a key for a different context} do
+    lambda do
+      key = Cryptography::Symmetric::Key.new(:unknown, Sodium::Auth.primitive, 32)
+      self.klass.new(key, self.plaintext)
+    end.must_raise ArgumentError
+  end
+
+  it %{won't instantiate with a key for an unrecognized primitive} do
+    lambda do
+      key = Cryptography::Symmetric::Key.new(:authenticated_message, :unknown, 32)
+      self.klass.new(key, self.plaintext)
+    end.must_raise ArgumentError
+  end
+
   it '#contents must require the key to reveal the message' do
     self.subject.contents(self.key).must_equal self.plaintext
+  end
+
+  it '#contents must not reveal the message if its length has been changed' do
+    tampered = self.subject.to_s[0..-2]
+
+    lambda do
+      self.klass.from_s(tampered)
+    end.must_raise ArgumentError
+  end
+
+  it '#contents must not reveal the message if it has been altered' do
+    # we have to jump through hoops here because it *shouldn't* be
+    # easy to modify these strings!
+    tampered = self.subject.to_s.to_str.dup.tap {|s| s[-1] = s[-1].succ }
+    hmac     = self.klass.from_s(tampered)
+
+    lambda do
+      hmac.contents(self.key)
+    end.must_raise ArgumentError
   end
 end

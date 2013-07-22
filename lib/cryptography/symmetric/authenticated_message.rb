@@ -22,7 +22,7 @@ class Cryptography::Symmetric::AuthenticatedMessage
   def on_initialize!
     _verify_context!
     _verify_primitive!
-    _verify_authenticator!
+    _verify_authenticator_size!
 
     self.attributes.freeze
     self.           freeze
@@ -30,7 +30,7 @@ class Cryptography::Symmetric::AuthenticatedMessage
 
   def initialize(key, message)
     self.attributes = {
-      :context       => :authenticated_message,
+      :context       => key.context,
       :primitive     => key.primitive,
       :message       => Sodium::Buffer.new(message),
     }
@@ -53,6 +53,9 @@ class Cryptography::Symmetric::AuthenticatedMessage
   end
 
   def authenticator(key)
+    _verify_context!
+    _verify_primitive!
+
     key.bytes(self.context, self.primitive) do |bytes|
       self.implementation.new(bytes)
     end
@@ -82,11 +85,13 @@ class Cryptography::Symmetric::AuthenticatedMessage
       self.implementation
   end
 
-  def _verify_authenticator!(key = nil)
-    raise ArgumentError, %{either the key or the authenticated message has been tampered with} unless
-      self.attributes[:authenticator].bytesize == self.implementation[:BYTES]
-
+  def _verify_authenticator_size!
     raise ArgumentError, %{either the key or the authenticated message has been tampered with} if
-      key && self.attributes[:authenticator] != self.authenticate(key)
+      self.attributes[:authenticator].bytesize != self.implementation[:BYTES]
+  end
+
+  def _verify_authenticator!(key)
+    raise ArgumentError, %{either the key or the authenticated message has been tampered with} if
+      self.authenticate(key) != self.attributes[:authenticator]
   end
 end
