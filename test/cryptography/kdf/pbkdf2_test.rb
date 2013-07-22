@@ -22,7 +22,7 @@ describe Cryptography::KDF::PBKDF2 do
 
     Benchmark.measure do
       pbkdf2.derive('xyz', 'xyz')
-    end.total.must_be_within_delta self.klass::DEFAULT_SECONDS, 0.2
+    end.total.must_be_within_delta self.klass::DEFAULT_SECONDS, 0.3
   end
 
   it '::cost must be different for different primitives' do
