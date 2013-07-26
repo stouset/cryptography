@@ -22,9 +22,10 @@ module Cryptography::Serializable
   module Context
     include Enum
 
-    UNKNOWN = 0
+    UNKNOWN  = 0
 
     AUTHENTICATED_MESSAGE = 10
+    PASSWORD              = 11
   end
 
   module Primitive
@@ -35,6 +36,7 @@ module Cryptography::Serializable
     # Cryptography::KDF primitives
     PBKDF2 = 10
     HKDF   = 11
+    BCRYPT = 12
 
     # Sodium::Auth primitives
     HMACSHA256    = 1000

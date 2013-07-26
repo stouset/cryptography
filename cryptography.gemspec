@@ -16,6 +16,7 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency 'sodium',                '~> 0.7'
   gem.add_dependency 'ruby-protocol-buffers', '~> 1'
+  gem.add_dependency 'bcrypt-ruby',           '~> 3'
 
   gem.add_development_dependency 'rake',     '~> 10'
   gem.add_development_dependency 'minitest', '~> 5'

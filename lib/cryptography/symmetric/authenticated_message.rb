@@ -46,6 +46,18 @@ class Cryptography::Symmetric::AuthenticatedMessage
     self.attributes[:message]
   end
 
+  def context
+    self.attributes[:context]
+  end
+
+  def primitive
+    self.attributes[:primitive]
+  end
+
+  def signature
+    self.attributes[:authenticator]
+  end
+
   protected
 
   def implementation
@@ -63,14 +75,6 @@ class Cryptography::Symmetric::AuthenticatedMessage
 
   def authenticate(key)
     self.authenticator(key).auth self.attributes[:message]
-  end
-
-  def context
-    self.attributes[:context]
-  end
-
-  def primitive
-    self.attributes[:primitive]
   end
 
   private
