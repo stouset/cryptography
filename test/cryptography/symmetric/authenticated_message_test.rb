@@ -4,7 +4,10 @@ describe Cryptography::Symmetric::AuthenticatedMessage do
   subject         { self.klass.new(self.key, self.plaintext) }
   let(:klass)     { Cryptography::Symmetric::AuthenticatedMessage }
   let(:key)       { self.klass.key }
-  let(:plaintext) { Sodium::Buffer.new('message') }
+
+  def plaintext
+    Sodium::Buffer.new 'message'.tr('', '')
+  end
 
   def self.protocol_buffer_authenticated_message_test_vector(plaintext, key, bytes)
     it "must never break backwards compatibility with the serialization format" do
@@ -65,8 +68,9 @@ describe Cryptography::Symmetric::AuthenticatedMessage do
   it '#contents must not reveal the message if it has been altered' do
     # we have to jump through hoops here because it *shouldn't* be
     # easy to modify these strings!
-    tampered = self.subject.to_s.to_str.dup.tap {|s| s[-1] = s[-1].succ }
-    hmac     = self.klass.from_s(tampered)
+    plaintext = self.plaintext.to_s.to_str
+    tampered  = self.subject.to_s.to_str.dup.tap {|s| s[plaintext] = plaintext.succ }
+    hmac      = self.klass.from_s(tampered)
 
     lambda do
       hmac.contents(self.key)

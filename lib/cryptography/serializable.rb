@@ -57,6 +57,15 @@ module Cryptography::Serializable
 
     def from_sodium_buffer(buffer)
       self.from_protocol_buffer self.serializer.parse(buffer.to_s)
+    rescue
+      # ProtocolBuffers::Message#parse doesn't gracefully handle
+      # errors. It just kind of throws whatever exception seemed
+      # convenient at the time. So we just always convert it to an
+      # ArgumentError (the string was an Argument, and it was
+      # errorful, so... it's not any worse than what it was).
+      raise ArgumentError.new($!.message).tap {|e|
+        e.set_backtrace($!.backtrace)
+      }
     end
 
     def from_protocol_buffer(buffer)
